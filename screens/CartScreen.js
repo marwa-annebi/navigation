@@ -20,58 +20,65 @@ export default function CartScreen() {
 
   const sendConfirmationEmail = async () => {
     try {
-      const response = await fetch('http://192.168.1.17:3000/send-email', {
+      const response = await fetch('http://192.168.100.30:3000/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify({
-          email: 'test@user.com', // Remplacez par l'email du client
-          name: 'Client Test', // Nom du client
-          orderDetails: cartItems, // Détails de la commande
+          email: 'test@user.com', // Replace with the client's email address
+          name: 'Client Test', // Replace with the client's name
+          orderDetails: cartItems, // Include cart items as order details
         }),
       });
-
-      if (response.ok) {
-        Alert.alert('Succès', 'Un email de confirmation a été envoyé.');
-      } else {
-        Alert.alert('Erreur', 'Erreur lors de l\'envoi de l\'email.');
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error Response:', errorText);
+        Alert.alert('Error', `Error sending email: ${errorText}`);
+        return;
       }
+  
+      Alert.alert('Success', 'A confirmation email has been sent successfully!');
     } catch (error) {
-      console.error('Erreur :', error);
-      Alert.alert('Erreur', 'Impossible d\'envoyer l\'email.');
+      console.error('Error while sending email:', error);
+      Alert.alert('Error', `Unable to send email: ${error.message}`);
     }
   };
+  
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      Alert.alert('Erreur', 'Votre panier est vide.');
+      Alert.alert('Error', 'Your shopping cart is empty.');
       return;
     }
 
     Alert.alert(
       'Confirmation',
-      'Êtes-vous sûr de vouloir passer la commande ?',
+      'Are you sure you want to place the order?',
       [
         {
-          text: 'Annuler',
-          style: 'cancel', // Ne fait rien si annulé
+          text: 'Cancel',
+          style: 'cancel', // Does nothing if canceled
         },
         {
-          text: 'Confirmer',
+          text: 'Confirm',
           onPress: () => {
+            // Functionality to execute upon confirmation
             sendLocalNotification(
-              'Commande confirmée !',
-              'Merci pour votre commande. Vous recevrez une confirmation sous peu.'
-            ); // Envoyer une notification
-            sendConfirmationEmail(); // Envoyer un email
-            clearCart(); // Vider le panier
-            navigation.navigate('OrderConfirmation'); // Naviguer vers l'écran de confirmation
+              'Order confirmed!',
+              'Thank you for your order. You will receive a confirmation shortly.'
+            ); // Send a local notification
+            sendConfirmationEmail(); // Send a confirmation email
+            clearCart(); // Clear the cart
+            navigation.navigate('OrderConfirmation'); // Navigate to the confirmation screen
           },
         },
       ],
-      { cancelable: false }
+      { cancelable: false } // Prevent dismissal by tapping outside the dialog
     );
+    
   };
 
   const renderItem = ({ item }) => (
@@ -101,7 +108,7 @@ export default function CartScreen() {
         style={styles.removeButton}
         onPress={() => {
           removeFromCart(item.id);
-          Alert.alert('Info', `${item.name} a été supprimé du panier.`);
+          Alert.alert('Info', `${item.name} has been removed from the cart.`);
         }}
       >
         <Ionicons name="trash-outline" size={24} color="#fff" />
@@ -111,7 +118,7 @@ export default function CartScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mon Panier</Text>
+      <Text style={styles.title}>My Cart</Text>
       {cartItems.length > 0 ? (
         <>
           <FlatList
@@ -122,11 +129,11 @@ export default function CartScreen() {
           />
           <Text style={styles.totalText}>Total : {getTotalPrice()}€</Text>
           <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
-            <Text style={styles.checkoutButtonText}>Passer la commande</Text>
+            <Text style={styles.checkoutButtonText}>Checkout</Text>
           </TouchableOpacity>
         </>
       ) : (
-        <Text style={styles.emptyText}>Votre panier est vide.</Text>
+        <Text style={styles.emptyText}>Your shopping cart is empty.</Text>
       )}
     </View>
   );
@@ -137,6 +144,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f9f9f9',
     padding: 16,
+    marginTop: 50,
   },
   title: {
     fontSize: 24,
@@ -228,5 +236,3 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
 });
-
-

@@ -13,7 +13,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import HeaderBar from '../components/HeaderBar';
 import { useCart } from '../context/CartContext';
-
+import { useTheme } from '../context/ThemeContext';
 // Product Data
 const products = [
   { id: '1', name: 'Produit 1', price: 20.0, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfYZDOa_VxElvv9quS78xD8KladFy6UjWdeg&s', category: 'Beauty & Personal Care' },
@@ -40,7 +40,7 @@ const products = [
   { id: '18', name: 'Yoga Mat', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUY64VZ2_5Z05lA6X7wyBtD1h9r0cqGZa0Ew&s', price: 30, category: 'Sports & Outdoors' },
 ];
 
-const itemsPerPage = 6; // Number of items to display per page
+const itemsPerPage = 3; // Number of items to display per page
 
 export default function HomeScreen() {
   const [filteredProducts, setFilteredProducts] = useState(products);
@@ -48,8 +48,9 @@ export default function HomeScreen() {
   const [priceRange, setPriceRange] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const { addToCart } = useCart();
+  const { theme, toggleTheme, useSystemTheme } = useTheme();
     const navigation = useNavigation(); // Navigation hook
-
+    const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const handleSearch = (searchTerm) => {
     const filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -87,31 +88,24 @@ export default function HomeScreen() {
     setFilteredProducts(filtered);
   };
 
-  const handleAddToCart = (item) => {
-    addToCart(item);
-    Alert.alert('Product Added', `${item.name} has been added to the cart.`);
-  };
 
+  const handleAddToCart = (item) => {
+    // Check if the product already exists in the cart
+    const cartItem = cartItems.find((cartItem) => cartItem.id === item.id);
+    
+    if (cartItem) {
+      Alert.alert('Already in Cart', `${item.name} is already in the cart.`);
+    } else {
+      addToCart(item);
+      Alert.alert('Product Added', `${item.name} has been added to the cart.`);
+    }
+  };
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // const renderItem = ({ item }) => (
-  //   <View style={styles.productCard}>
-  //      <TouchableOpacity
-  //       onPress={() => navigation.navigate('ProductDetails', { product: item })}
-  //     >
 
-  //     </TouchableOpacity>
-  //     <Image source={{ uri: item.image }} style={styles.productImage} />
-  //     <Text style={styles.productName}>{item.name}</Text>
-  //     <Text style={styles.productPrice}>{item.price}€</Text>
-  //     <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
-  //       <Text style={styles.addButtonText}>Add to Cart</Text>
-  //     </TouchableOpacity>
-  //   </View>
-  // );
   const renderItem = ({ item }) => (
     <View style={styles.productCard}>
       <TouchableOpacity
@@ -121,9 +115,9 @@ export default function HomeScreen() {
         <Text style={styles.productName}>{item.name}</Text>
         <Text style={styles.productPrice}>{item.price}€</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
-        <Text style={styles.addButtonText}>Ajouter au panier</Text>
-      </TouchableOpacity>
+ <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
+    <Text style={styles.addButtonText}>Add To Cart</Text>
+  </TouchableOpacity>
     </View>
   );
   return (
@@ -153,7 +147,7 @@ export default function HomeScreen() {
         <Picker.Item label="All Prices" value="All Prices" />
         <Picker.Item label="0€ - 50€" value="0-50" />
         <Picker.Item label="51€ - 200€" value="51-200" />
-        <Picker.Item label="201€ - 1000€" value="201-1000" />
+        <Picker.Item label="201€ - 10000€" value="201-10000" />
       </Picker>
 
       {/* Product List */}
@@ -190,6 +184,7 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
       </View>
+     
     </View>
   );
 }
@@ -246,5 +241,30 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     fontSize: 18,
   },
+  light: {
+    backgroundColor: '#fff',
+  },
+  dark: {
+    backgroundColor: '#333',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    color: '#007bff',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  infoText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#007bff',
+  },
 });
-

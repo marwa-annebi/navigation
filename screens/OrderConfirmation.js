@@ -7,15 +7,15 @@ export default function OrderConfirmation() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Merci pour votre commande !</Text>
+      <Text style={styles.title}>Thank you for your order!</Text>
       <Text style={styles.message}>
-        Votre commande a été passée avec succès. Vous recevrez bientôt une confirmation par email.
+      Your order has been placed successfully. You will receive a confirmation email shortly.
       </Text>
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.navigate('AppTabs', { screen: 'Home' })}
       >
-        <Text style={styles.backButtonText}>Retour à la boutique</Text>
+        <Text style={styles.backButtonText}>Return to the store</Text>
       </TouchableOpacity>
     </View>
   );
