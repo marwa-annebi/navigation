@@ -20,7 +20,7 @@ export default function CartScreen() {
 
   const sendConfirmationEmail = async () => {
     try {
-      const response = await fetch('http://192.168.100.30:3000/send-email', {
+      const response = await fetch('http://192.168.1.26:3000/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
