@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,16 +8,16 @@ import {
   Modal,
   FlatList,
   Animated,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useColorScheme } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useColorScheme } from "react-native";
+import { useTheme } from "../context/theme";
 
 export default function HeaderBar({ onSearch }) {
   const { theme } = useTheme(); // Access theme from context
   const colorScheme = useColorScheme(); // Detect the current theme
-  const iconColor = colorScheme === 'dark' ? '#fff' : '#000';
-  const backgroundColor = colorScheme === 'dark' ? '#333' : '#f9f9f9';
+  const iconColor = colorScheme === "dark" ? "#fff" : "#000";
+  const backgroundColor = colorScheme === "dark" ? "#333" : "#f9f9f9";
 
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -29,7 +29,7 @@ export default function HeaderBar({ onSearch }) {
   useEffect(() => {
     if (colorScheme) {
       const message = `System theme changed to ${
-        colorScheme === 'dark' ? 'Dark' : 'Light'
+        colorScheme === "dark" ? "Dark" : "Light"
       } mode.`;
       setNotifications((prev) => [
         ...prev,
@@ -74,33 +74,41 @@ export default function HeaderBar({ onSearch }) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Left Icon */}
-      <TouchableOpacity style={styles.iconButton}>
-        <Ionicons name="mail-outline" size={24} color={iconColor} />
-      </TouchableOpacity>
+      {/* <TouchableOpacity style={styles.iconButton}>
+        <Ionicons name="mail-outline" size={24} color={theme.colors.primary} />
+      </TouchableOpacity> */}
 
       {/* Search Bar */}
       <View
-        style={[
-          styles.searchBar,
-          { backgroundColor: colorScheme === 'dark' ? '#444' : '#fff' },
-        ]}
+        style={[styles.searchBar, { backgroundColor: theme.colors.background }]}
       >
         <TextInput
-          style={[styles.searchInput, { color: iconColor }]}
+          style={[styles.searchInput, { color: theme.colors.primary }]}
           placeholder="Search products..."
-          placeholderTextColor={colorScheme === 'dark' ? '#ccc' : '#777'}
+          placeholderTextColor={theme.colors.primaryVariant}
           onChangeText={onSearch}
         />
         <TouchableOpacity style={styles.searchIcon}>
-          <Ionicons name="search-outline" size={20} color={iconColor} />
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color={theme.colors.primary}
+          />
         </TouchableOpacity>
       </View>
-
-      {/* Notifications Icon with Badge */}
-      <TouchableOpacity style={styles.iconButton} onPress={handleNotificationClick}>
-        <Ionicons name="notifications-outline" size={24} color={iconColor} />
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={handleNotificationClick}
+      >
+        <Ionicons
+          name="notifications-outline"
+          size={24}
+          color={theme.colors.primary}
+        />
         {notificationCount > 0 && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{notificationCount}</Text>
@@ -124,48 +132,49 @@ export default function HeaderBar({ onSearch }) {
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.notificationList}
             />
-            <TouchableOpacity style={styles.closeButton} onPress={closeNotificationModal}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={closeNotificationModal}
+            >
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-
-   
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 10,
   },
   iconButton: {
     marginHorizontal: 8,
-    position: 'relative',
+    position: "relative",
   },
   badge: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'red',
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    backgroundColor: "red",
     borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 12,
+    height: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
   badgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: "#fff",
+    fontSize: 7,
+    fontWeight: "bold",
   },
   searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
     marginHorizontal: 10,
     borderRadius: 20,
@@ -180,29 +189,29 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
+    width: "80%",
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   notificationList: {
-    width: '100%',
+    width: "100%",
   },
   notificationItem: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: "#ccc",
   },
   notificationText: {
     fontSize: 16,
@@ -210,24 +219,23 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     borderRadius: 5,
   },
   closeButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
   systemNotification: {
-    position: 'absolute',
+    position: "absolute",
     top: 60,
-    left: '10%',
-    right: '10%',
-    backgroundColor: '#007bff',
+    left: "10%",
+    right: "10%",
+    backgroundColor: "#007bff",
     padding: 8,
     borderRadius: 8,
   },
 });
-
 
 // import React from 'react';
 // import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
@@ -265,7 +273,7 @@ const styles = StyleSheet.create({
 //       </TouchableOpacity>
 //     </View>
 //   );
-// } 
+// }
 
 // const styles = StyleSheet.create({
 //   container: {
@@ -294,7 +302,6 @@ const styles = StyleSheet.create({
 //     marginLeft: 10,
 //   },
 // });
-
 
 // import React, { useState } from 'react';
 // import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
@@ -355,12 +362,12 @@ const styles = StyleSheet.create({
 // }
 
 // const styles = StyleSheet.create({
-  // container: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'space-between',
-  //   padding: 10,
-  //   backgroundColor: '#b10000',
+// container: {
+//   flexDirection: 'row',
+//   alignItems: 'center',
+//   justifyContent: 'space-between',
+//   padding: 10,
+//   backgroundColor: '#b10000',
 //   },
 //   leftIcons: {
 //     flexDirection: 'row',
