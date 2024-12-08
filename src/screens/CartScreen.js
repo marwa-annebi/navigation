@@ -80,8 +80,8 @@ export default function CartScreen() {
           text: "Confirm",
           onPress: async () => {
             await sendPushNotification(pushNotifToken, {
-              title: "Order Confirmation",
-              body: "Your order has been placed successfully!",
+              title: "Hello! Thank you for your order. 📬",
+              body: "Your order has been placed successfully. You will receive a confirmation email shortly.",
             });
             sendConfirmationEmail();
             clearCart();
