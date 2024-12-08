@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../../firebase-config";
 import { useTheme } from "../context/theme";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../redux/actions/authActions";
 
 // Initialize Firebase
 initializeApp(firebaseConfig);
@@ -24,8 +26,16 @@ export default function RegisterScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { theme, switchTheme, appearance } = useTheme();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.auth);
 
-  const handleRegister = async () => {
+  useEffect(() => {
+    // Show alert when error occurs
+    if (error) {
+      Alert.alert("Error", error);
+    }
+  }, [error]);
+  const handleRegister = () => {
     if (!email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
@@ -36,21 +46,9 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
-    try {
-      const auth = getAuth();
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigation.navigate("AccountCreated");
-    } catch (error) {
-      let errorMessage = "Registration failed! Please try again.";
-      if (error.code === "auth/email-already-in-use") {
-        errorMessage = "This email is already in use.";
-      } else if (error.code === "auth/weak-password") {
-        errorMessage = "Password should be at least 6 characters long.";
-      }
-      Alert.alert("Error", errorMessage);
-    }
+    // Dispatch the registerUser action
+    dispatch(registerUser(email, password, navigation));
   };
-
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}

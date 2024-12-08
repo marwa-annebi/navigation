@@ -44,12 +44,7 @@ export default function AppTabs() {
               <View>
                 <Ionicons name={iconName} size={size} color={color} />
                 {route.name === "Cart" && getTotalQuantity() > 0 && (
-                  <View
-                    style={[
-                      styles.badge,
-                      { backgroundColor: theme.colors.error }, // Dynamic badge color
-                    ]}
-                  >
+                  <View style={[styles.badge]}>
                     <Text
                       style={[
                         styles.badgeText,
@@ -67,9 +62,9 @@ export default function AppTabs() {
           tabBarInactiveTintColor:
             theme.custom.bottomNavigation.inactiveIconsText,
           tabBarStyle: {
-            backgroundColor: theme.custom.bottomNavigation.container, // Dynamic background
+            backgroundColor: theme.custom.bottomNavigation.container,
           },
-          headerShown: false, // Disable the header for all screens
+          headerShown: false,
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
@@ -79,10 +74,9 @@ export default function AppTabs() {
           name="Cart"
           component={CartScreen}
           options={{
-            tabBarBadge: cartItems.length > 0 ? cartItems.length : null, // Show badge if cart is not empty
+            tabBarBadge: cartItems.length > 0 ? cartItems.length : null,
           }}
         />
-        {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
         <Tab.Screen name="Settings" component={SettingsScreen} />
       </Tab.Navigator>
     </View>

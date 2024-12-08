@@ -11,20 +11,23 @@ import {
 import { useCart } from "../context/CartContext";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import {
-  registerForPushNotificationsAsync,
-  sendLocalNotification,
-} from "../services/notificationService";
+
 import { useTheme } from "../context/theme";
+import { useSelector } from "react-redux"; // Import to access user email from Redux store
+import { sendPushNotification } from "../services/pushNotifService";
 
 export default function CartScreen() {
+  const pushNotifToken = useSelector((state) => state.auth.pushNotifToken);
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const navigation = useNavigation();
   const { theme } = useTheme();
 
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
+  // Get authenticated user's email from Redux store
+  const userEmail = useSelector((state) => state.auth?.user?.email);
+
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
+  // }, []);
 
   const getTotalPrice = () => {
     return cartItems
@@ -41,8 +44,8 @@ export default function CartScreen() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          email: "test@user.com",
-          name: "Client Test",
+          email: userEmail, // Send email to the authenticated user
+          name: "Valued Customer", // Replace with dynamic name if available
           orderDetails: cartItems,
         }),
       });
@@ -75,14 +78,14 @@ export default function CartScreen() {
         { text: "Cancel", style: "cancel" },
         {
           text: "Confirm",
-          onPress: () => {
-            sendLocalNotification(
-              "Order confirmed!",
-              "Thank you for your order. You will receive a confirmation shortly."
-            );
+          onPress: async () => {
+            await sendPushNotification(pushNotifToken, {
+              title: "Order Confirmation",
+              body: "Your order has been placed successfully!",
+            });
             sendConfirmationEmail();
             clearCart();
-            navigation.navigate("OrderConfirmation");
+            // navigation.navigate("OrderConfirmation");
           },
         },
       ],

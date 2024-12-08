@@ -15,9 +15,9 @@ import HeaderBar from "../components/HeaderBar";
 import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/theme";
 import { products } from "../../assets/data/products";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const itemsPerPage = 6; // Increased number of items per page for better layout
-
+const itemsPerPage = 6;
 export default function HomeScreen() {
   const [filteredProducts, setFilteredProducts] = useState(products);
   const { theme } = useTheme();
@@ -105,7 +105,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <View
+    <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <HeaderBar onSearch={handleSearch} />
@@ -154,10 +154,26 @@ export default function HomeScreen() {
           onValueChange={handlePriceChange}
           style={[styles.picker, { backgroundColor: theme.colors.surface }]}
         >
-          <Picker.Item label="All Prices" value="All Prices" />
-          <Picker.Item label="0€ - 50€" value="0-50" />
-          <Picker.Item label="51€ - 200€" value="51-200" />
-          <Picker.Item label="201€ - 10000€" value="201-10000" />
+          <Picker.Item
+            label="All Prices"
+            value="All Prices"
+            color={theme.text().primary}
+          />
+          <Picker.Item
+            color={theme.text().primary}
+            label="0€ - 50€"
+            value="0-50"
+          />
+          <Picker.Item
+            color={theme.text().primary}
+            label="51€ - 200€"
+            value="51-200"
+          />
+          <Picker.Item
+            color={theme.text().primary}
+            label="201€ - 10000€"
+            value="201-10000"
+          />
         </Picker>
       </View>
 
@@ -166,7 +182,7 @@ export default function HomeScreen() {
         data={paginatedProducts}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        numColumns={2} // Display products in grid
+        numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.productList}
       />
@@ -209,7 +225,7 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -217,7 +233,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    marginTop: 50,
   },
   filterContainer: {
     flexDirection: "row",

@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import HeaderBar from "../components/HeaderBar";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../context/theme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const categories = [
   { id: "1", name: "Electronics", icon: "tv-outline" },
@@ -79,13 +80,13 @@ export default function CategoriesScreen() {
   );
 
   return (
-    <View
+    <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <HeaderBar onSearch={handleSearch} />
       <Text style={[styles.title, { color: theme.colors.primary }]}>
         Categories
       </Text>
+      <HeaderBar showNotif={false} onSearch={handleSearch} />
 
       <FlatList
         data={filteredCategories}
@@ -95,7 +96,7 @@ export default function CategoriesScreen() {
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    marginTop: 50,
+    gap: 3,
   },
   title: {
     fontSize: 24,

@@ -14,13 +14,17 @@ import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import ResetPasswordScreen from "./src/screens/ResetPasswordScreen";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setAuthFromStorage } from "./src/redux/slices/authSlice";
+import {
+  setAuthFromStorage,
+  setPushNotifToken,
+} from "./src/redux/slices/authSlice";
 import store from "./src/redux/store/store";
 import { ThemeProvider } from "./src/context/theme";
 import { darkTheme, lightTheme } from "./src/themes/theme";
 import { Text } from "react-native";
 import AccountCreatedScreen from "./src/screens/AccountCreatedScreen";
-
+import { registerForPushNotificationsAsync } from "./src/services/pushNotifService";
+import * as Notifications from "expo-notifications";
 const Stack = createNativeStackNavigator();
 
 // Wrapper Component to Load Auth State from Storage
@@ -28,6 +32,7 @@ const AppNavigator = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
+  useNotifications();
 
   useEffect(() => {
     const checkAuthState = async () => {
@@ -116,7 +121,40 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+const useNotifications = () => {
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        const token = await registerForPushNotificationsAsync();
+        if (token) {
+          dispatch(setPushNotifToken(token));
+        }
+      } catch (error) {
+        console.error("Error fetching push notification token:", error);
+      }
+    };
+
+    getToken();
+
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received:", notification);
+      }
+    );
+
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("Notification clicked:", response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener);
+      Notifications.removeNotificationSubscription(responseListener);
+    };
+  }, [dispatch]);
+};
 // Main App Component
 export default function App() {
   return (

@@ -13,16 +13,10 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import {
-  loginFailure,
-  loginStart,
-  loginSuccess,
-} from "../redux/slices/authSlice";
 import { firebaseConfig } from "../../firebase-config";
 import { useTheme } from "../context/theme";
+import { loginUser } from "../redux/actions/authActions";
 
 // Initialize Firebase
 initializeApp(firebaseConfig);
@@ -36,45 +30,13 @@ export default function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
 
-    dispatch(loginStart());
-
-    const auth = getAuth();
-
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const token = await userCredential.user.getIdToken();
-      await AsyncStorage.setItem("authToken", token);
-      await AsyncStorage.setItem(
-        "user",
-        JSON.stringify({
-          email: userCredential.user.email,
-          uid: userCredential.user.uid,
-        })
-      );
-      dispatch(
-        loginSuccess({
-          user: {
-            email: userCredential.user.email,
-            uid: userCredential.user.uid,
-          },
-          token,
-        })
-      );
-      navigation.navigate("AppTabs");
-    } catch (err) {
-      dispatch(loginFailure(err.message));
-      Alert.alert("Error", err.message);
-    }
+    dispatch(loginUser(email, password));
   };
 
   const handleTogglePasswordVisibility = () => {
@@ -221,19 +183,19 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    width: "95%", // Adjusted width for better spacing
-    height: 40, // Reduced height
+    width: "95%",
+    height: 40,
     borderWidth: 1,
-    borderRadius: 10, // Slightly smaller border radius
-    paddingHorizontal: 8, // Reduced padding
-    marginBottom: 15, // Less margin between inputs
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    marginBottom: 15,
   },
   icon: {
-    marginRight: 8, // Reduced margin for compact design
+    marginRight: 8,
   },
   input: {
     flex: 1,
-    fontSize: 14, // Smaller font size
+    fontSize: 14,
   },
   button: {
     width: "90%",

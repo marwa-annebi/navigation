@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,18 +17,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { Avatar } from "react-native-paper";
 import { logout } from "../redux/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { logoutUser } from "../redux/actions/authActions";
+import * as ImagePicker from "expo-image-picker";
+import { Camera } from "expo-camera";
 export default function SettingsScreen() {
   const { theme, switchTheme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [profileImage, setProfileImage] = useState(null);
+  const [hasCamPerm, sethasCamPerm] = useState(null);
+
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const generateAvatarLabel = (email) => {
-    if (!email) return "U";
-    const [username] = email.split("@");
-    return username.charAt(0).toUpperCase();
-  };
   const handleLogout = () => {
     Alert.alert(
       "Confirm Logout",
@@ -39,22 +39,60 @@ export default function SettingsScreen() {
           text: "Logout",
           style: "destructive",
           onPress: () => {
-            (async () => {
-              try {
-                await AsyncStorage.removeItem("authToken");
-                await AsyncStorage.removeItem("user");
-                dispatch(logout());
-              } catch (error) {
-                console.error("Error during logout:", error);
-              }
-            })();
+            dispatch(logoutUser());
           },
         },
       ],
       { cancelable: true }
     );
   };
+  useEffect(() => {
+    const loadProfileImage = async () => {
+      const storedImage = await AsyncStorage.getItem("profileImage");
+      if (storedImage) {
+        setProfileImage(storedImage);
+      }
+    };
+    loadProfileImage();
+  }, []);
+  useEffect(() => {
+    (async () => {
+      MediaLibrary.requestPermissionsAsync();
+      const cameraStatus = await Camera.requestCameraPermissionsAsync();
+      sethasCamPerm(cameraStatus.status === "granted");
+    })();
+  }, []);
+  if (hasCamPerm === false) {
+    return <Text>No access to camera</Text>;
+  }
 
+  // Pick image from camera or gallery
+  const handleImagePicker = async (source) => {
+    try {
+      let result;
+      if (source === "camera") {
+        result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 0.8,
+        });
+      } else {
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 0.8,
+        });
+      }
+
+      if (!result.canceled && result.assets) {
+        const uri = result.assets[0].uri;
+        setProfileImage(uri);
+        await AsyncStorage.setItem("profileImage", uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+    }
+  };
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -69,19 +107,39 @@ export default function SettingsScreen() {
           },
         ]}
       >
-        <Avatar.Text
-          size={60}
-          label={generateAvatarLabel(user.email)}
-          color={theme.colors.onPrimary}
-          style={{ backgroundColor: theme.colors.primary }}
-        />
+        {profileImage ? (
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
+        ) : (
+          <Avatar.Text
+            size={60}
+            label={user.email?.charAt(0).toUpperCase() || "U"}
+            color={theme.colors.onPrimary}
+            style={{ backgroundColor: theme.colors.primary }}
+          />
+        )}
         <View style={styles.profileDetails}>
           <Text style={[styles.userName, { color: theme.colors.primary }]}>
-            {user.name || "User Name"}
+            Email
           </Text>
           <Text style={[styles.userEmail, { color: theme.text().secondary }]}>
             {user.email || "user@example.com"}
           </Text>
+        </View>
+        <View style={styles.imageOptions}>
+          <TouchableOpacity onPress={() => handleImagePicker("camera")}>
+            <Ionicons
+              name="camera-outline"
+              size={24}
+              color={theme.colors.primary}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleImagePicker("gallery")}>
+            <Ionicons
+              name="image-outline"
+              size={24}
+              color={theme.colors.primary}
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -346,5 +404,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: "600",
+  },
+  imageOptions: {
+    flexDirection: "row",
+    gap: 10,
   },
 });
